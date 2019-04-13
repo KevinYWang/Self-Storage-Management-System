@@ -19,6 +19,7 @@ namespace Self_Storage_Management_System.web
 
         public static IWebHostBuilder CreateWebHostBuilder(string[] args) =>
             WebHost.CreateDefaultBuilder(args)
-                .UseStartup<Startup>();
+                .UseStartup<Startup>()
+                .UseUrls("https://localhost:4000");
     }
 }
