@@ -10,6 +10,7 @@ using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.HttpsPolicy;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.SpaServices.AngularCli;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -36,14 +37,16 @@ namespace Self_Storage_Management_System.web
             services.AddDbContext<DataContext>(x => x.UseInMemoryDatabase("TestDb"));
             services.AddMvc().SetCompatibilityVersion(CompatibilityVersion.Version_2_2);
             services.AddAutoMapper();
-             
+            services.AddSpaStaticFiles(configuration => { configuration.RootPath = "App/dist/storage-system-app"; });
+
             var appSettingsSection = Configuration.GetSection("AppSettings");
             services.Configure<AppConfig>(appSettingsSection);
             var appSettings = appSettingsSection.Get<AppConfig>();
             var key = Encoding.ASCII.GetBytes(appSettings.Secret);
 
             services.Configure<CookiePolicyOptions>(options =>
-            { options.CheckConsentNeeded = context => true;
+            {
+                options.CheckConsentNeeded = context => true;
                 options.MinimumSameSitePolicy = SameSiteMode.None;
             });
 
@@ -58,13 +61,15 @@ namespace Self_Storage_Management_System.web
                     {
                         OnTokenValidated = context =>
                         {
-                            var accountService = context.HttpContext.RequestServices.GetRequiredService<IAccountService>();
+                            var accountService =
+                                context.HttpContext.RequestServices.GetRequiredService<IAccountService>();
                             var accountId = int.Parse(context.Principal.Identity.Name);
                             var account = accountService.GetAccountById(accountId);
                             if (account == null)
-                            { 
+                            {
                                 context.Fail("Unauthorized");
                             }
+
                             return Task.CompletedTask;
                         }
                     };
@@ -101,11 +106,36 @@ namespace Self_Storage_Management_System.web
             app.UseStaticFiles();
             app.UseCookiePolicy();
 
+
+
+            app.UseCors(builder => builder
+                .AllowAnyOrigin()
+                .AllowAnyHeader()
+                .AllowAnyMethod());
+
+
+            app.UseSpaStaticFiles();
+
+
+
             app.UseMvc(routes =>
             {
                 routes.MapRoute(
                     name: "default",
-                    template: "{controller=Home}/{action=Index}/{id?}");
+                    template: "{controller}/{action=Index}/{id?}");
+            });
+
+            app.UseSpa(spa =>
+            {
+
+                spa.Options.SourcePath = "storage-system-app";
+
+                if (env.IsDevelopment())
+                {
+//                    spa.UseAngularCliServer(npmScript: "start");
+                    spa.Options.StartupTimeout = TimeSpan.FromSeconds(520); // Increase the timeout if angular app is taking longer to startup
+                    //spa.UseProxyToSpaDevelopmentServer("http://localhost:4200"); // Use this instead to use the angular cli server
+                }
             });
         }
     }
