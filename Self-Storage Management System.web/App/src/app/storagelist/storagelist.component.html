@@ -1,3 +1,49 @@
+<h2>My Storeage List</h2>
 <p>
-  storagelist works!
-</p>
+
+  <ag-grid-angular #agGrid style="width: auto; height: 360px;" class="ag-theme-balham" [rowData]="rowData"
+    [columnDefs]="columnDefs" rowSelection="multiple">
+  </ag-grid-angular>
+  <div class="row">
+    <div class="col-1">
+      <button color="primary" mat-flat-button (click)="Checkout()"> Check Out Selected Rows</button>
+    </div>
+    <div class="col-2"></div>
+    <div class="col-1">
+      <button color="primary" mat-flat-button (click)="TurnOnAddingNewStorage()"> Add New Storage</button>
+    </div>
+  </div>
+
+
+  <div *ngIf="loadingNewStorage">
+    <h2>adding new storage here</h2>
+    <form [formGroup]="newStorageForm" (ngSubmit)="onAddNewStorageSubmit()">
+      <div class="form-group">
+        <label for="itemName">Item Name:</label>
+        <input type="text" formControlName="itemName" class="form-control"
+          [ngClass]="{ 'is-invalid': submitted && f.itemName.errors }" />
+        <div *ngIf="submitted && f.itemName.errors" class="invalid-feedback">
+          <div *ngIf="f.firstitemNameName.errors.required">Item name is required</div>
+        </div>
+      </div>
+      <div class="form-group">
+        <label for="fromDate">From Date:</label>
+        <input type="date" formControlName="fromDate" class="form-control"
+          [ngClass]="{ 'is-invalid': submitted && f.fromDate.errors }" />
+        <div *ngIf="submitted && f.fromDate.errors" class="invalid-feedback">
+          <div *ngIf="f.fromDate.errors.required">Starging date is required</div>
+        </div>
+      </div>
+      <div class="form-group">
+        <div class='row'>
+          <div class="col-1">
+            <button [disabled]="loading" class="btn btn-primary">Register </button>
+            <img *ngIf="loading"
+              src="data:image/gif;base64,R0lGODlhEAAQAPIAAP///wAAAMLCwkJCQgAAAGJiYoKCgpKSkiH/C05FVFNDQVBFMi4wAwEAAAAh/hpDcmVhdGVkIHdpdGggYWpheGxvYWQuaW5mbwAh+QQJCgAAACwAAAAAEAAQAAADMwi63P4wyklrE2MIOggZnAdOmGYJRbExwroUmcG2LmDEwnHQLVsYOd2mBzkYDAdKa+dIAAAh+QQJCgAAACwAAAAAEAAQAAADNAi63P5OjCEgG4QMu7DmikRxQlFUYDEZIGBMRVsaqHwctXXf7WEYB4Ag1xjihkMZsiUkKhIAIfkECQoAAAAsAAAAABAAEAAAAzYIujIjK8pByJDMlFYvBoVjHA70GU7xSUJhmKtwHPAKzLO9HMaoKwJZ7Rf8AYPDDzKpZBqfvwQAIfkECQoAAAAsAAAAABAAEAAAAzMIumIlK8oyhpHsnFZfhYumCYUhDAQxRIdhHBGqRoKw0R8DYlJd8z0fMDgsGo/IpHI5TAAAIfkECQoAAAAsAAAAABAAEAAAAzIIunInK0rnZBTwGPNMgQwmdsNgXGJUlIWEuR5oWUIpz8pAEAMe6TwfwyYsGo/IpFKSAAAh+QQJCgAAACwAAAAAEAAQAAADMwi6IMKQORfjdOe82p4wGccc4CEuQradylesojEMBgsUc2G7sDX3lQGBMLAJibufbSlKAAAh+QQJCgAAACwAAAAAEAAQAAADMgi63P7wCRHZnFVdmgHu2nFwlWCI3WGc3TSWhUFGxTAUkGCbtgENBMJAEJsxgMLWzpEAACH5BAkKAAAALAAAAAAQABAAAAMyCLrc/jDKSatlQtScKdceCAjDII7HcQ4EMTCpyrCuUBjCYRgHVtqlAiB1YhiCnlsRkAAAOwAAAAAAAAAAAA==" />
+          </div>
+          <div class="col-1"></div>
+          <div class="col-1"> <button class="btn btn-outline-primary" (click)="CancelAdding()"> Cancel</button></div>
+        </div>
+      </div>
+    </form>
+  </div>

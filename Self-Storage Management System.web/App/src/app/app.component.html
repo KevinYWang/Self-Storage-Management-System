@@ -1,20 +1,6 @@
-<!--The content below is only a placeholder and can be replaced.-->
-<div style="text-align:left">
-  <button color="primary"  mat-flat-button (click)="getSelectedRows()">Get Selected Rows</button>
-  <ag-grid-angular  #agGrid
-  style="width: 800px; height: 500px;"
-  class="ag-theme-balham"
-  [rowData]="rowData | async"
-  [columnDefs]="columnDefs"
-  rowSelection="multiple"
-  >
-</ag-grid-angular>
-<br>
-<button mat-raised-button color="warn" (click)="addSeries()">Add Series</button>
-<div #chartTarget>
-  chart target
-  </div>
 
-</div>
-
-<router-outlet></router-outlet>
+    <div class="container">
+      <div class="col-12 w-100">
+          <router-outlet></router-outlet>
+      </div>
+    </div>
