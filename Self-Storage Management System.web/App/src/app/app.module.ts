@@ -17,6 +17,7 @@ import { UsageChartDirective } from './directive/usage-chart.directive';
 import { AlertComponent } from './directive/alert.component';
 import { AlertService, AuthenticationService, AccountService } from './service';
 import { JwtInterceptor, ErrorInterceptor } from './helpers';
+import { Globals } from './globals';
 
 @NgModule({
   declarations: [
@@ -45,6 +46,7 @@ import { JwtInterceptor, ErrorInterceptor } from './helpers';
     ReactiveFormsModule
   ],
   providers: [
+    Globals,
     AlertService,
     AuthenticationService,
     AccountService,

@@ -4,9 +4,10 @@ import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { HttpClient } from '@angular/common/http';
 import { AgGridNg2 } from 'ag-grid-angular';
 import { StoragelistserviceService } from '../service/storagelistservice.service';
-import { first } from 'rxjs/operators';
-import { AlertService } from '../service';
+import { StorageItem } from '../models/StorageItem';
+import { Globals } from '../globals';
 import { chart } from 'highcharts';
+import { first } from 'rxjs/operators';
 import * as Highcharts from 'highcharts';
 
 @Component({
@@ -17,44 +18,45 @@ import * as Highcharts from 'highcharts';
 export class StoragelistComponent implements OnInit {
   @ViewChild('agGrid') agGrid: AgGridNg2;
   @ViewChild('chartTarget') chartTarget: ElementRef;
-  loadingNewStorage: boolean = false;
+  @ViewChild('addNewStorageModal') myModal: ElementRef;
   rowData: any;
   //Highcharts.ChartObject;
   chart: any;
   newStorageForm: FormGroup;
-  loading = false;
   submitted = false;
+  loadingNewStorage: boolean = false;
 
 
   constructor(
     private http: HttpClient,
     private formBuilder: FormBuilder,
     private storagelistserviceService: StoragelistserviceService,
-    private alertService: AlertService) {
+    private globals: Globals
+  ) {
 
   }
 
   columnDefs = [
     { headerName: "ID", field: "id", hide: true, suppressToolPanel: true },
     { headerName: 'Item Description', field: 'itemName', sortable: true, filter: true, checkboxSelection: true },
-    { headerName: 'From', field: 'fromDate', sortable: true, filter: true },
-    { headerName: 'To', field: 'toDate', sortable: true, filter: true }
+    {
+      headerName: 'From', field: 'fromDate', sortable: true, filter: true,
+      cellRenderer: (data) => {
+        return data.value ? (new Date(data.value)).toDateString() : '';
+      }
+    },
+    {
+      headerName: 'To', field: 'toDate', sortable: true, filter: true, cellRenderer: (data) => {
+        return data.value ? (new Date(data.value)).toDateString() : '';
+      }
+    }
 
   ];
 
 
   ngOnInit() {
-    let endDate: Date = new Date();
-    let startDate: Date = new Date(endDate.setDate(endDate.getDate() - 2));
-
-    this.rowData = [{
-      id: 1, itemName: 'item one', fromDate: startDate.toDateString(), toDate: endDate.toDateString()
-    },
-    {
-      id: 2, itemName: 'item Two', fromDate: startDate.toDateString(), toDate: endDate.toDateString()
-    }];
-
-
+    this.globals.loading = false;
+    this.rowData = this.storagelistserviceService.getAll();
     this.newStorageForm = this.formBuilder.group({
       itemName: ['', Validators.required],
       fromDate: ['', Validators.required]
@@ -66,10 +68,19 @@ export class StoragelistComponent implements OnInit {
     const selectedNodes = this.agGrid.api.getSelectedNodes();
     if (selectedNodes.length < 1) {
       alert(`Please select the items you need to check out.`);
+      return;
     }
-    const selectedData = selectedNodes.map(node => node.data);
-    const selectedDataStringPresentation = selectedData.map(node => node.itemName).join(', ');
-    alert(`Check out item: ${selectedDataStringPresentation}`);
+    const selectedData: StorageItem[] = selectedNodes.map(node => node.data);
+
+    let updatedItems: StorageItem[] = this.storagelistserviceService.update(selectedData);
+    if (updatedItems.length > 0) {
+      updatedItems.forEach(tempItem => {
+        let changedItem: StorageItem = this.rowData.find(x => x.id == tempItem.id);
+        changedItem.toDate = tempItem.toDate;
+      })
+    }
+
+    this.agGrid.api.redrawRows();
   }
 
   TurnOnAddingNewStorage() {
@@ -86,18 +97,19 @@ export class StoragelistComponent implements OnInit {
     if (this.newStorageForm.invalid) {
       return;
     }
-
-    this.loading = true;
+    this.globals.loading = true;
     this.storagelistserviceService.AddNewStorage(this.newStorageForm.value)
       .pipe(first())
       .subscribe(
-        data => {
-          this.alertService.success('Registration successful', true);
+        (data: StorageItem) => {
+          this.rowData.push(data);
+          this.agGrid.api.redrawRows();
         },
         error => {
-          this.alertService.error(error);
-          this.loading = false;
+          alert(error);
         });
+    this.globals.loading = false;
+
   }
 }
 

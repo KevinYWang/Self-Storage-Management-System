@@ -5,15 +5,14 @@
     [columnDefs]="columnDefs" rowSelection="multiple">
   </ag-grid-angular>
   <div class="row">
-    <div class="col-1">
+    <div class="col-3">
       <button color="primary" mat-flat-button (click)="Checkout()"> Check Out Selected Rows</button>
     </div>
-    <div class="col-2"></div>
-    <div class="col-1">
+    <div class="col-3">
       <button color="primary" mat-flat-button (click)="TurnOnAddingNewStorage()"> Add New Storage</button>
     </div>
+    <div class="col-6"></div>
   </div>
-
 
   <div *ngIf="loadingNewStorage">
     <h2>adding new storage here</h2>
