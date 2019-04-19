@@ -21,33 +21,29 @@ export class StoragelistserviceService {
 
 
   AddNewStorage(itemValue: any) {
-    return this.http.post(`${this.globals.apiUrl}/storage/addStorage`, itemValue);
+    return this.http.post(`${this.globals.apiUrl}/home/addStorage`, itemValue);
 
   }
 
-  getAll(): StorageItem[] {
+  getAll() {
 
-    if (this.myStorageList.length == 0) {
-      let endDate: Date = new Date();
-      let startDate: Date = new Date(endDate.setDate(endDate.getDate() - 2));
+//    if (this.myStorageList.length == 0) {
+//      let endDate: Date = new Date();
+//      let startDate: Date = new Date(endDate.setDate(endDate.getDate() - 2));
+//
+//      let tempStorageList: StorageItem[] = [{
+//        id: 1, itemName: 'item one', fromDate: startDate, toDate: null, accountId:null
+//      },
+//      {
+//        id: 2, itemName: 'item Two', fromDate: startDate, toDate: null, accountId: null
+//      }];
 
-      let tempStorageList: StorageItem[] = [{
-        id: 1, itemName: 'item one', fromDate: startDate, toDate: null
-      },
-      {
-        id: 2, itemName: 'item Two', fromDate: startDate, toDate: null
-      }];
-
-      // this.http.get<StorageItem[]>(`${this.globals.apiUrl}/storage/getall`);
-      this.myStorageList = tempStorageList;
-    }
-
-    return this.myStorageList;
+      return  this.http.get<StorageItem[]>(`${this.globals.apiUrl}/storage/getall`); 
   }
 
 
   update(items: StorageItem[]): StorageItem[] {
-    // return this.http.post(`${this.globals.apiUrl}/storage/update`, items);
+    // return this.http.post(`${this.globals.apiUrl}/home/update`, items);
     let updatedItems: StorageItem[] = [];
     items.forEach(itemValue => {
       let toUpdateItem = this.myStorageList.find(x => x.id == itemValue.id);

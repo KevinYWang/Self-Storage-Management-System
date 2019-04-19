@@ -16,15 +16,18 @@ import * as Highcharts from 'highcharts';
   styleUrls: ['./storagelist.component.css']
 })
 export class StoragelistComponent implements OnInit {
-  @ViewChild('agGrid') agGrid: AgGridNg2;
-  @ViewChild('chartTarget') chartTarget: ElementRef;
-  @ViewChild('addNewStorageModal') myModal: ElementRef;
+  @ViewChild('agGrid')
+  agGrid: AgGridNg2;
+  @ViewChild('chartTarget')
+  chartTarget: ElementRef;
+  @ViewChild('addNewStorageModal')
+  myModal: ElementRef;
   rowData: any;
-  //Highcharts.ChartObject;
+  // Highcharts.ChartObject;
   chart: any;
   newStorageForm: FormGroup;
   submitted = false;
-  loadingNewStorage: boolean = false;
+  loadingNewStorage = false;
 
 
   constructor(
@@ -37,31 +40,38 @@ export class StoragelistComponent implements OnInit {
   }
 
   columnDefs = [
-    { headerName: "ID", field: "id", hide: true, suppressToolPanel: true },
+    { headerName: 'ID', field: 'id', hide: true, suppressToolPanel: true },
     { headerName: 'Item Description', field: 'itemName', sortable: true, filter: true, checkboxSelection: true },
     {
-      headerName: 'From', field: 'fromDate', sortable: true, filter: true,
+      headerName: 'From',
+      field: 'fromDate',
+      sortable: true,
+      filter: true,
       cellRenderer: (data) => {
         return data.value ? (new Date(data.value)).toDateString() : '';
       }
     },
     {
-      headerName: 'To', field: 'toDate', sortable: true, filter: true, cellRenderer: (data) => {
+      headerName: 'To',
+      field: 'toDate',
+      sortable: true,
+      filter: true,
+      cellRenderer: (data) => {
         return data.value ? (new Date(data.value)).toDateString() : '';
       }
     }
-
   ];
 
 
   ngOnInit() {
     this.globals.loading = false;
-    this.rowData = this.storagelistserviceService.getAll();
+    this.rowData = this.getStorageList();
     this.newStorageForm = this.formBuilder.group({
       itemName: ['', Validators.required],
       fromDate: ['', Validators.required]
     });
   }
+
   get f() { return this.newStorageForm.controls; }
 
   Checkout() {
@@ -75,9 +85,9 @@ export class StoragelistComponent implements OnInit {
     let updatedItems: StorageItem[] = this.storagelistserviceService.update(selectedData);
     if (updatedItems.length > 0) {
       updatedItems.forEach(tempItem => {
-        let changedItem: StorageItem = this.rowData.find(x => x.id == tempItem.id);
+        let changedItem: StorageItem = this.rowData.find((x: { id: number; }) => x.id === tempItem.id);
         changedItem.toDate = tempItem.toDate;
-      })
+      });
     }
 
     this.agGrid.api.redrawRows();
@@ -86,6 +96,7 @@ export class StoragelistComponent implements OnInit {
   TurnOnAddingNewStorage() {
     this.loadingNewStorage = true;
   }
+
   CancelAdding() {
     this.loadingNewStorage = false;
   }
@@ -111,14 +122,24 @@ export class StoragelistComponent implements OnInit {
     this.globals.loading = false;
 
   }
+
+
+  getStorageList() {
+    this.globals.loading = true;
+    this.storagelistserviceService.getAll()
+      .pipe(first())
+      .subscribe(
+        (data: StorageItem[]) => {
+          this.rowData = data;
+          this.agGrid.api.redrawRows();
+        },
+        error => {
+          alert(error);
+        });
+
+    this.globals.loading = false;
+  }
 }
-
-
-
-
-
-
-
 
 
 // ngAfterViewInit() {

@@ -1,14 +1,16 @@
-﻿import { Injectable } from '@angular/core';
+import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { map } from 'rxjs/operators';
+import { Globals } from '../globals';
 
 @Injectable()
 export class AuthenticationService {
   apiUrl: string ="https://localhost";
-    constructor(private http: HttpClient) { }
+  constructor(private http: HttpClient,
+    private globals: Globals) { }
 
     login(username: string, password: string) {
-        return this.http.post<any>(`${this.apiUrl}/users/authenticate`, { username: username, password: password })
+      return this.http.post<any>(`${this.globals.apiUrl}/users/authenticate`, { username: username, password: password })
             .pipe(map(user => {
                 // login successful if there's a jwt token in the response
                 if (user && user.token) {

@@ -1,9 +1,12 @@
 ﻿using System;
+using System.ComponentModel.DataAnnotations;
+using Microsoft.EntityFrameworkCore.Metadata.Internal;
 
-namespace Self_Storage_Management_System.Core.Entities
+namespace Self_Storage_Management_System.Core.Models.Account
 {
     public class Account
     {
+        [Key]
         public int Id { get; set; }
         public string FirstName { get; set; }
         public string LastName { get; set; }

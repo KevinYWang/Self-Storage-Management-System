@@ -3,4 +3,5 @@ export class StorageItem {
   itemName: string;
   fromDate: Date;
   toDate: Date;
+  accountId: number;
 }

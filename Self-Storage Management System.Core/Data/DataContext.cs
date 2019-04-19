@@ -1,5 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore;
-using Self_Storage_Management_System.Core.Entities;
+using Self_Storage_Management_System.Core.Models.Account;
+using Self_Storage_Management_System.Core.Models.StorageItem;
 
 namespace Self_Storage_Management_System.Core.Data
 {
@@ -10,5 +11,6 @@ namespace Self_Storage_Management_System.Core.Data
         }
 
         public DbSet<Account> Accounts { get; set; }
+        public DbSet<StorageItem> StorageItems { get; set; }
     }
 }

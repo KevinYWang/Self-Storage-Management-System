@@ -4,8 +4,8 @@ using System.Linq;
 using System.Security.Cryptography.X509Certificates;
 using System.Threading.Tasks;
 using Self_Storage_Management_System.Core.Data;
-using Self_Storage_Management_System.Core.Entities;
 using Self_Storage_Management_System.Core.Helpers;
+using Self_Storage_Management_System.Core.Models.Account;
 using Self_Storage_Management_System.web.Models.Account;
 
 namespace Self_Storage_Management_System.web.Services
