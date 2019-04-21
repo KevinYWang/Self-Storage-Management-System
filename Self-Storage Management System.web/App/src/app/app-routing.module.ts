@@ -8,12 +8,12 @@ import { AccountregisterComponent } from './account/accountregister/accountregis
 
 const routes: Routes = [
 
-  { path: '', redirectTo: 'home', pathMatch: 'full'},
+  { path: '', redirectTo: 'login', pathMatch: 'full'},
   {
     path: 'home', component: HomeComponent,
     children: [
       { path: '', component: StoragelistComponent },
-      { path: 'account', component: AccountComponent },
+      { path: 'myaccount', component: AccountComponent },
       { path: 'storagelist', component: StoragelistComponent }
     ]
   },

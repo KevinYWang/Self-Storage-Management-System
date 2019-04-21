@@ -34,7 +34,6 @@ export class AccountregisterComponent implements OnInit {
 
   onSubmit() {
     this.submitted = true;
-
     if (this.registerForm.invalid) {
       return;
     }
@@ -48,7 +47,7 @@ export class AccountregisterComponent implements OnInit {
           this.router.navigate(['/login']);
         },
         error => {
-          this.alertService.error(error);
+          alert(error);
           this.loading = false;
         });
   }

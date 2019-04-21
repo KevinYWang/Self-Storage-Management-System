@@ -15,5 +15,6 @@ namespace Self_Storage_Management_System.web.Models.Account
         public string PassWord { get; set; }
         public string PhoneNumber { get; set; }
         public DateTime LastVisited { get; set; }
+        public string Token { get; set; }
     }
 }

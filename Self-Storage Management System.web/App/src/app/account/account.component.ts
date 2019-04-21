@@ -3,6 +3,7 @@ import { Router } from '@angular/router';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { first } from 'rxjs/operators';
 import { AlertService, AccountService } from '../service';
+import { Account } from '../models/account';
 
 @Component({
   selector: 'app-account',
@@ -21,13 +22,26 @@ export class AccountComponent implements OnInit {
     private alertService: AlertService) { }
 
   ngOnInit() {
+    // set user info from localstorage;
+    let accountString: string = localStorage.getItem('currentUser');
+    if (accountString === null) {
+      this.router.navigate(['/login']);
+    }
+    let account: Account = JSON.parse(accountString);
+    if (account === null || account.token === null) {
+      this.router.navigate(['/login']);
+    };
+
+
     this.registerForm = this.formBuilder.group({
-      firstName: ['', Validators.required],
-      lastName: ['', Validators.required],
-      email: ['', [Validators.required, Validators.email]],
+      firstName: [account.firstName, Validators.required],
+      lastName: [account.lastName, Validators.required],
+      email: [account.email, [Validators.required, Validators.email]],
       password: ['', [Validators.required, Validators.minLength(6)]],
-      phoneNumber: ['', Validators.required]
+      phoneNumber: [account.phoneNumber, Validators.required]
     });
+
+
   }
 
 

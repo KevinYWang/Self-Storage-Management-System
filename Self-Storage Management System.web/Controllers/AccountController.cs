@@ -9,6 +9,7 @@ using AutoMapper;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Configuration;
 using Microsoft.IdentityModel.Tokens;
 using Self_Storage_Management_System.Core.Helpers;
 using Self_Storage_Management_System.Core.Models.Account;
@@ -26,16 +27,18 @@ namespace Self_Storage_Management_System.web.Controllers
         private IAccountService _accountService;
         private IMapper _mapper;
         private readonly AppConfig _appConfig;
+        private IConfiguration configuration;
 
-        public AccountController(IAccountService accountService, IMapper mapper, AppConfig appConfig)
+        public AccountController(IAccountService accountService, IMapper mapper, AppConfig appConfig, IConfiguration configuration)
         {
             _accountService = accountService;
             _mapper = mapper;
             _appConfig = appConfig;
+            this.configuration = configuration;
         }
 
         [AllowAnonymous]
-        [HttpPost("authenticate")]
+        [HttpPost("/account/authenticate")]
         public async Task<IActionResult> Authenticate([FromBody]AccountDto accountDto)
         {
             var account = await  _accountService.AuthenticateAccount(accountDto.Email, accountDto.PassWord);
@@ -44,6 +47,14 @@ namespace Self_Storage_Management_System.web.Controllers
                 return BadRequest(new { message = "incorrect Username/password" });
 
             var tokenHandler = new JwtSecurityTokenHandler();
+            if (string.IsNullOrEmpty(_appConfig.Secret))
+            {
+
+                var appSettingsSection = configuration.GetSection("AppSettings"); 
+                var appSettings = appSettingsSection.Get<AppConfig>();
+                _appConfig.Secret = appSettings.Secret; 
+            }
+
             var key = Encoding.ASCII.GetBytes(_appConfig.Secret);
             var tokenDescriptor = new SecurityTokenDescriptor
             {
@@ -71,7 +82,7 @@ namespace Self_Storage_Management_System.web.Controllers
 
 
         [AllowAnonymous]
-        [HttpPost("register")]
+        [HttpPost("/account/register")]
         public async Task<IActionResult> Register([FromBody]AccountDto accountDto)
         {
             var account = _mapper.Map<Account>(accountDto);
@@ -88,8 +99,9 @@ namespace Self_Storage_Management_System.web.Controllers
                 return BadRequest(new { message = ex.Message });
             }
         }
+         
 
-        [HttpGet]
+        [HttpPost("/account/getall")]
         public async Task<IActionResult> GetAll()
         {
             var users = _accountService.GetAll();
@@ -97,7 +109,8 @@ namespace Self_Storage_Management_System.web.Controllers
             return Ok(accountDtos);
         }
 
-        [HttpGet("{id}")]
+
+        [HttpPost("/account/GetById")]
         public async Task<IActionResult> GetById(int id)
         {
             var account = await _accountService.GetAccountById(id);
@@ -105,7 +118,8 @@ namespace Self_Storage_Management_System.web.Controllers
             return Ok(accountDto);
         }
 
-        [HttpPut("{id}")]
+
+        [HttpPost("/account/update")]
         public async Task<IActionResult> Update(int id, [FromBody]AccountDto accountDto)
         {
             // map dto to entity and set id
@@ -125,7 +139,8 @@ namespace Self_Storage_Management_System.web.Controllers
             }
         }
 
-        [HttpDelete("{id}")]
+
+        [HttpPost("/account/delete")]
         public async Task<IActionResult> Delete(int id)
         {
             await _accountService.Delete(id);

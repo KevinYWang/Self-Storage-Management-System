@@ -4,5 +4,7 @@ export class Account {
   password: string;
   firstName: string;
   lastName: string;
-  lastFresh: Date ;
+  lastFresh: Date;
+  phoneNumber:string;
+  token: string;
 }

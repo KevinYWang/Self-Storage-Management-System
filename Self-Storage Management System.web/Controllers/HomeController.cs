@@ -1,41 +1,38 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Diagnostics;
-using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
-using Self_Storage_Management_System.Core.Models.Account;
 using Self_Storage_Management_System.Core.Models.StorageItem;
-using Self_Storage_Management_System.web.Models;
 using Self_Storage_Management_System.web.Services;
 
 namespace Self_Storage_Management_System.web.Controllers
 {
-//    [Authorize]
+    [Authorize]
     [Route("[controller]")]
     [ApiController]
-    public class HomeController : Controller
+    public class HomeController : ControllerBase
     {
         private IStorageService _storageService;
-        private UserManager<Account> _userManager;
-        private Account _account = null;
 
+        private int _accountId;
 
-        public HomeController(IStorageService storageService, UserManager<Account> userManager)
+        public HomeController(IStorageService storageService)
         {
             _storageService = storageService;
-            _userManager = userManager;
         }
 
+        [HttpGet("/storage/getall")]
         public async Task<IActionResult> GetAll()
         {
+            if (_accountId < 1)
+            {
+                var ctx = HttpContext.Authentication.HttpContext;
+                _accountId = int.Parse(ctx.User.Identity.Name);
+            }
+
             try
             {
-                if (_account == null)
-                    _account = await _userManager.GetUserAsync(HttpContext.User);
-                var results = await _storageService.GetAll(_account.Id);
+                var results = await _storageService.GetAll(_accountId);
                 return Ok(results);
             }
             catch (Exception ex)
@@ -44,13 +41,18 @@ namespace Self_Storage_Management_System.web.Controllers
             }
         }
 
+        [HttpPost("/storage/add")]
         public async Task<IActionResult> AddStorage(StorageItemDto newItem)
         {
+            if (_accountId < 1)
+            {
+                var ctx = HttpContext.Authentication.HttpContext;
+                _accountId = int.Parse(ctx.User.Identity.Name);
+            }
+
             try
             {
-                if (_account == null)
-                    _account = await _userManager.GetUserAsync(HttpContext.User);
-                newItem.AccountId = _account.Id;
+                newItem.AccountId = _accountId;
                 var result = await _storageService.AddStorage(newItem);
                 return Ok(result);
             }
@@ -60,6 +62,7 @@ namespace Self_Storage_Management_System.web.Controllers
             }
         }
 
+        [HttpPost("/storage/update")]
         public async Task<IActionResult> Update(StorageItem[] newItems)
         {
             try

@@ -31,11 +31,10 @@ namespace Self_Storage_Management_System.Core.Data
 
         public async Task<List<StorageItem>> GetAll(int userId)
         {
-             
             var results = await Task.Run(() =>
-                    _dataContext.StorageItems.Where(x => x.AccountId == userId)
-                        .OrderByDescending(y => y.FromDate).ToList()
-                );
+                _dataContext.StorageItems.Where(x => x.AccountId == userId)
+                    .OrderByDescending(y => y.FromDate).ToList()
+            );
             return results;
         }
 
@@ -50,26 +49,39 @@ namespace Self_Storage_Management_System.Core.Data
             }
             catch (Exception ex)
             {
-                throw ex; 
-            } 
+                throw ex;
+            }
         }
 
         public async Task<StorageItem[]> Update(StorageItem[] newItems)
         {
+            var itemIds = newItems.Select(y => y.Id).ToList();
             var oldItems = _dataContext.StorageItems
-                .Where(x => newItems.Select(y => y.Id).ToList().Contains(x.Id))
+                .Where(x => itemIds.Contains(x.Id))
                 .ToList();
 
 
-            if (oldItems.Count !=newItems.Length)
+            if (oldItems.Count != newItems.Length)
             {
                 throw new Exception("Not all items can be updated. Please check and try again.");
             }
 
-             _dataContext.StorageItems.UpdateRange(newItems);
-             await _dataContext.SaveChangesAsync();
+            oldItems.ForEach(x =>
+            {
+                var newItem = newItems.FirstOrDefault(y => y.Id == x.Id);
+                if (newItem != null)
+                {
+                    x.FromDate = newItem.FromDate;
+                    x.ToDate = newItem.ToDate;
+                    x.ItemName = newItem.ItemName;
+                }
+            });
 
-             return newItems;
+
+            _dataContext.StorageItems.UpdateRange(oldItems);
+            await _dataContext.SaveChangesAsync();
+
+            return newItems;
         }
     }
 }

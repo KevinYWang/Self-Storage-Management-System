@@ -80,15 +80,36 @@ export class StoragelistComponent implements OnInit {
       alert(`Please select the items you need to check out.`);
       return;
     }
-    const selectedData: StorageItem[] = selectedNodes.map(node => node.data);
+    let selectedData: StorageItem[] = selectedNodes.map(node => node.data);
+    
+    //update checkout dates
+    selectedData.forEach(x => {
+      x.toDate = new Date();
+    });
 
-    let updatedItems: StorageItem[] = this.storagelistserviceService.update(selectedData);
-    if (updatedItems.length > 0) {
-      updatedItems.forEach(tempItem => {
-        let changedItem: StorageItem = this.rowData.find((x: { id: number; }) => x.id === tempItem.id);
-        changedItem.toDate = tempItem.toDate;
-      });
-    }
+    //update at the back end; 
+    this.globals.loading = true;
+    this.storagelistserviceService.update(selectedData)
+      .pipe(first())
+      .subscribe(
+        (data: StorageItem[]) => {
+          if (data.length > 0) {
+            data.forEach(tempItem => {
+              let changedItem: StorageItem = this.rowData.find((x: { id: number; }) => x.id === tempItem.id);
+
+              changedItem.itemName = tempItem.itemName;
+              changedItem.fromDate = tempItem.fromDate;
+              changedItem.toDate = tempItem.toDate;
+            });
+          }
+
+          this.agGrid.api.redrawRows();
+        },
+        error => {
+          alert(error);
+        });
+    this.globals.loading = false;;
+
 
     this.agGrid.api.redrawRows();
   }
@@ -108,13 +129,16 @@ export class StoragelistComponent implements OnInit {
     if (this.newStorageForm.invalid) {
       return;
     }
+    let self = this; 
     this.globals.loading = true;
     this.storagelistserviceService.AddNewStorage(this.newStorageForm.value)
       .pipe(first())
       .subscribe(
         (data: StorageItem) => {
-          this.rowData.push(data);
-          this.agGrid.api.redrawRows();
+          self.rowData.push(data);
+          self.agGrid.api.redrawRows();
+          self.agGrid.api.refreshCells();
+          this.loadingNewStorage = false;
         },
         error => {
           alert(error);
@@ -133,7 +157,7 @@ export class StoragelistComponent implements OnInit {
           this.rowData = data;
           this.agGrid.api.redrawRows();
         },
-        error => {
+        error => { 
           alert(error);
         });
 

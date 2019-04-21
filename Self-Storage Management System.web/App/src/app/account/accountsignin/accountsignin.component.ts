@@ -15,6 +15,7 @@ export class AccountsigninComponent implements OnInit {
   loading = false;
   submitted = false;
   returnUrl: string;
+  loginFailed=false;
 
   constructor(
     private formBuilder: FormBuilder,
@@ -30,7 +31,7 @@ export class AccountsigninComponent implements OnInit {
     });
 
     this.authenticationService.logout();
-    this.returnUrl = this.route.snapshot.queryParams.returnUrl || '/';
+    this.returnUrl = this.route.snapshot.queryParams.returnUrl || '/home';
   }
 
   // convenience getter for easy access to form fields
@@ -45,15 +46,20 @@ export class AccountsigninComponent implements OnInit {
     }
 
     this.loading = true;
-    this.authenticationService.login(this.f.username.value, this.f.password.value)
+    var self = this;
+    this.authenticationService.login(this.f.email.value, this.f.password.value)
       .pipe(first())
       .subscribe(
         data => {
+          this.loginFailed = false;
           this.router.navigate([this.returnUrl]);
         },
         error => {
-          this.alertService.error(error);
+          this.loginFailed = true;
           this.loading = false;
+          setTimeout(function () {
+            self.loginFailed = false;
+          }, 3000);
         });
   }
 }

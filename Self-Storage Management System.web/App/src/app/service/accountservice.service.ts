@@ -8,16 +8,14 @@ import { Globals } from '../globals';
   providedIn: 'root'
 })
 
-export class AccountService {
-  apiUrl: string = "https://localhost:4200";
-
+export class AccountService { 
   constructor(private http: HttpClient,
     private globals: Globals) {
   }
 
 
   getAll() {
-    return this.http.get<Account[]>(`${this.globals.apiUrl}/account`);
+    return this.http.get<Account[]>(`${this.globals.apiUrl}/account/`);
   }
 
   getById(id: number) {

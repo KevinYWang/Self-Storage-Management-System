@@ -5,25 +5,25 @@ import { Globals } from '../globals';
 
 @Injectable()
 export class AuthenticationService {
-  apiUrl: string ="https://localhost";
   constructor(private http: HttpClient,
-    private globals: Globals) { }
+    private globals: Globals) {
+  }
 
-    login(username: string, password: string) {
-      return this.http.post<any>(`${this.globals.apiUrl}/users/authenticate`, { username: username, password: password })
-            .pipe(map(user => {
-                // login successful if there's a jwt token in the response
-                if (user && user.token) {
-                    // store user details and jwt token in local storage to keep user logged in between page refreshes
-                    localStorage.setItem('currentUser', JSON.stringify(user));
-                }
+  login(email: string, password: string) {
+    return this.http.post<any>(`${this.globals.apiUrl}/Account/authenticate`, { email: email, password: password })
+      .pipe(map(user => {
+        // login successful if there's a jwt token in the response
+        if (user && user.token) {
+          // store user details and jwt token in local storage to keep user logged in between page refreshes
+          localStorage.setItem('currentUser', JSON.stringify(user));
+        }
 
-                return user;
-            }));
-    }
+        return user;
+      }));
+  }
 
-    logout() {
-        // remove user from local storage to log user out
-        localStorage.removeItem('currentUser');
-    }
+  logout() {
+    // remove user from local storage to log user out
+    localStorage.removeItem('currentUser');
+  }
 }

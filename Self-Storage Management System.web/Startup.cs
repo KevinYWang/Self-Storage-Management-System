@@ -16,6 +16,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.IdentityModel.Tokens;
 using Self_Storage_Management_System.Core.Data;
+using Self_Storage_Management_System.Core.Models;
 using Self_Storage_Management_System.web.Config;
 using Self_Storage_Management_System.web.Services;
 
@@ -36,7 +37,10 @@ namespace Self_Storage_Management_System.web
             services.AddCors();
             services.AddDbContext<DataContext>(x => x.UseInMemoryDatabase("TestDb"));
             services.AddMvc().SetCompatibilityVersion(CompatibilityVersion.Version_2_2);
+
+            Mapper.Initialize(cfg => { cfg.AddProfile<AutoMapperProfile>(); });
             services.AddAutoMapper();
+
             services.AddSpaStaticFiles(configuration => { configuration.RootPath = "App/dist/storage-system-app"; });
 
             var appSettingsSection = Configuration.GetSection("AppSettings");
@@ -84,8 +88,11 @@ namespace Self_Storage_Management_System.web
                     };
                 });
 
-            // configure DI for application services
+            //DI for application services
             services.AddScoped<IAccountService, AccountService>();
+            services.AddScoped<IStorageService, StorageService>();
+            services.AddScoped<IStorageDao, StorageDao>();
+            services.AddScoped<AppConfig, AppConfig>();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -97,15 +104,12 @@ namespace Self_Storage_Management_System.web
             }
             else
             {
-                app.UseExceptionHandler("/Home/Error");
-                // The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
                 app.UseHsts();
             }
 
             app.UseHttpsRedirection();
             app.UseStaticFiles();
             app.UseCookiePolicy();
-
 
 
             app.UseCors(builder => builder
@@ -116,25 +120,25 @@ namespace Self_Storage_Management_System.web
 
             app.UseSpaStaticFiles();
 
-
-
+            app.UseAuthentication();
             app.UseMvc(routes =>
             {
                 routes.MapRoute(
                     name: "default",
-                    template: "{controller}/{action=Index}/{id?}");
+                    template: "{controller=Home}/{action=Index}/{id?}"
+                );
             });
 
             app.UseSpa(spa =>
             {
-
-                spa.Options.SourcePath = "storage-system-app";
+                spa.Options.SourcePath = "App";
 
                 if (env.IsDevelopment())
                 {
 //                    spa.UseAngularCliServer(npmScript: "start");
-                    spa.Options.StartupTimeout = TimeSpan.FromSeconds(520); // Increase the timeout if angular app is taking longer to startup
-                    //spa.UseProxyToSpaDevelopmentServer("http://localhost:4200"); // Use this instead to use the angular cli server
+//                    spa.UseProxyToSpaDevelopmentServer("http://localhost:4200");
+                    spa.Options.StartupTimeout =
+                        TimeSpan.FromSeconds(520); // Increase the timeout if angular app is taking longer to startup
                 }
             });
         }
